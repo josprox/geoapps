@@ -2,19 +2,57 @@
 
 ## Diagrama de Flujo de Datos
 
+### Diagrama de Componentes (Estructura)
 ```mermaid
 graph TD
-    User[Usuario] -->|Sube Imagen| Frontend["Next.js Frontend /satellite"]
-    Frontend -->|POST FormData| API["Next.js API Route /api/process-image"]
-    API -->|Guarda Archivo| FS["Sistema de Archivos (temp/)"]
-    API -->|Ejecuta Shell| Python["Script Python (process_satellite.py)"]
-    Python -->|Lee Imagen| FS
-    Python -->|"Procesa (K-Means)"| Python
-    Python -->|Guarda Resultado| FS
-    Python -->|Imprime JSON| API
-    API -->|Lee Imagen Resultado| FS
-    API -->|"Respuesta JSON (Base64)"| Frontend
-    Frontend -->|Renderiza| User
+    subgraph Client [Cliente]
+        User((Usuario))
+        Browser[Navegador Web]
+    end
+
+    subgraph Server [Servidor Next.js]
+        Frontend["Frontend (/satellite)"]
+        API["API Route (/api/process-image)"]
+    end
+
+    subgraph Backend [Procesamiento]
+        Python["Worker Python (OpenCV)"]
+        FS[("Sistema de Archivos (temp/)")]
+    end
+
+    User -->|Interacción| Browser
+    Browser -->|Upload| Frontend
+    Frontend -->|HTTP POST| API
+    API -->|Spawn Process| Python
+    API -->|Read/Write| FS
+    Python -->|Read/Write| FS
+```
+
+### Diagrama de Secuencia (Flujo de Datos)
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant FE as Frontend
+    participant API as API Route
+    participant FS as FileSystem
+    participant PY as Python Script
+
+    U->>FE: Sube Imagen
+    FE->>API: POST /api/process-image
+    activate API
+    API->>FS: Guarda imagen temporal
+    API->>PY: Ejecuta proceso
+    activate PY
+    PY->>FS: Lee imagen
+    PY->>PY: K-Means Clustering
+    PY->>FS: Guarda imagen análisis
+    PY-->>API: Retorna JSON (stdout)
+    deactivate PY
+    API->>FS: Lee imagen análisis
+    API->>FS: Limpieza (borra temporales)
+    API-->>FE: Respuesta JSON + Base64
+    deactivate API
+    FE-->>U: Muestra Dashboard
 ```
 
 ## Componentes Principales
