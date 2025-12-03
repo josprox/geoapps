@@ -1,5 +1,26 @@
 # Documentación de Módulos
 
+## 🖥️ Frontend (Next.js)
+
+La interfaz de usuario está construida con React y Next.js 16, utilizando Tailwind CSS para el estilizado.
+
+### Páginas
+#### `/satellite` (`app/satellite/page.tsx`)
+Página principal del visor satelital.
+-   **Estado:** Gestiona las coordenadas actuales (`lat`, `lng`).
+-   **Componentes:**
+    -   `CoordinateInput`: Formulario para ingresar latitud y longitud.
+    -   `SatelliteMap`: Mapa interactivo (Leaflet) que muestra la ubicación.
+-   **Comportamiento:** Carga dinámicamente el mapa (SSR desactivado) para evitar conflictos con `window` en el servidor.
+
+### Componentes Clave
+#### `SatelliteMap`
+-   Wrapper de `react-leaflet`.
+-   Renderiza el mapa base y marcadores.
+-   Permite la interacción del usuario para seleccionar áreas de interés.
+
+---
+
 ## 🐍 Python: `process_satellite.py`
 
 Este script es el núcleo de procesamiento de imágenes.
